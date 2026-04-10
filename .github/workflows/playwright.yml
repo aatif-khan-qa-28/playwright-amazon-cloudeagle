@@ -1,0 +1,157 @@
+name: Playwright E2E Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: 'Browser to run tests on'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - chromium
+          - firefox
+          - webkit
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  BASE_URL: 'https://www.amazon.in'
+
+jobs:
+  # ── Static checks (fast gate before running expensive browser tests) ──────
+  static-checks:
+    name: Typecheck & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+  # ── Browser matrix (Chromium / Firefox / WebKit) ──────────────────────────
+  e2e-tests:
+    name: E2E — ${{ matrix.browser }}
+    runs-on: ubuntu-latest
+    needs: static-checks
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false        # keep running other browsers even if one fails
+      matrix:
+        browser:
+          - chromium
+          - firefox
+          - webkit
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser — ${{ matrix.browser }}
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Run Playwright tests — ${{ matrix.browser }}
+        if: >
+          github.event_name != 'workflow_dispatch' ||
+          github.event.inputs.browser == 'all' ||
+          github.event.inputs.browser == matrix.browser
+        run: npx playwright test --project=${{ matrix.browser }}
+        env:
+          CI: true
+          BASE_URL: ${{ env.BASE_URL }}
+
+      # Always upload artifacts so failures are debuggable
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.browser }}
+          path: test-results/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: playwright-report/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # ── Merge all HTML reports into one hosted page ───────────────────────────
+  publish-report:
+    name: Publish merged report
+    runs-on: ubuntu-latest
+    needs: e2e-tests
+    if: always() && github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download all report artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: playwright-report-*
+          path: all-reports/
+          merge-multiple: false
+
+      - name: Merge blob reports
+        run: |
+          # Flatten every per-browser HTML report into a combined folder
+          mkdir -p merged-report
+          for dir in all-reports/playwright-report-*/; do
+            browser=$(basename "$dir" | sed 's/playwright-report-//')
+            cp -r "$dir"* merged-report/ 2>/dev/null || true
+          done
+
+      - name: Deploy report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./merged-report
+          destination_dir: reports/${{ github.run_number }}
+          keep_files: true

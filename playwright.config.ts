@@ -37,7 +37,8 @@ export default defineConfig({
   },
 
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'], channel: 'chrome' } },
+    // In CI we rely on the Playwright-bundled Chromium; locally 'chrome' is preferred.
+    { name: 'chromium', use: { ...devices['Desktop Chrome'], ...(isCI ? {} : { channel: 'chrome' }) } },
     { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
   ],
