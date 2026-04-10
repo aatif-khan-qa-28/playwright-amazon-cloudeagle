@@ -24,11 +24,6 @@ import { containsIgnoreCase, parseCurrencyAmount } from '../utils';
 
 for (const td of testCases) {
   test.describe(`Amazon Purchase Flow — ${td.id}`, () => {
-    // Guarantee a clean cart before every run so prior state never bleeds in
-    test.beforeEach(async ({ cartPage }) => {
-      await cartPage.clearCart();
-    });
-
     test(
       `should complete the full purchase flow for "${td.product.name}"`,
       { tag: ['@smoke', '@e2e'] },
