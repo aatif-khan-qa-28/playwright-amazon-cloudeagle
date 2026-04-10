@@ -16,7 +16,7 @@ export class HomePage extends BasePage {
   async navigate(): Promise<void> {
     // Use networkidle so CI runners (which may get redirects or bot-check pages)
     // wait for the page to fully settle before asserting landmarks.
-    await this.goto('/', 'networkidle');
+    await this.goto('/', 'domcontentloaded');
     // Search box is the functional signal that the page loaded correctly.
     await expect(this.searchBox).toBeVisible({ timeout: 30_000 });
     // Use .first() — the navLogo multi-selector can match multiple elements (strict mode violation).
