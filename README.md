@@ -189,7 +189,6 @@ cp .env.example .env
 | `npm run test:chromium`      | Chromium only                          |
 | `npm run test:firefox`       | Firefox only                           |
 | `npm run test:webkit`        | WebKit / Safari only                   |
-| `npm run test:mobile`        | Mobile Chrome (Pixel 7 viewport)       |
 | `npm run test:cross-browser` | Chromium + Firefox + WebKit in one run |
 
 ### Utilities
@@ -306,3 +305,7 @@ Amazon renders full variant titles in cart, not the short PDP name. The `verifyI
 ### Price reads as 0 or NaN
 
 The price locator targets `.a-offscreen` elements inside `#buybox` excluding `.a-text-price` (MRP). If Amazon changes their DOM, inspect the live page and update `ProductPageLocators.productPrice` in [locators/ProductPageLocators.ts](locators/ProductPageLocators.ts).
+
+### "Continue Shopping" interstitial after Add to Cart
+
+Amazon occasionally shows a "Continue shopping" page/modal instead of the usual ATC side-sheet. `clickAddToCart()` detects and dismisses it automatically — no action required. If the interstitial changes its selector, update `continueShoppingButton` in [locators/ProductPageLocators.ts](locators/ProductPageLocators.ts).
