@@ -14,6 +14,9 @@ export class ProductPage extends BasePage {
   );
   private readonly cartSubtotal = this.page.locator(ProductPageLocators.cartSubtotal);
   private readonly goToCartButton = this.page.locator(ProductPageLocators.goToCartButton);
+  private readonly continueShoppingButton = this.page.locator(
+    ProductPageLocators.continueShoppingButton,
+  );
 
   /**
    * Assert we landed on a product detail page:
@@ -108,6 +111,13 @@ export class ProductPage extends BasePage {
   async clickAddToCart(): Promise<void> {
     await expect(this.addToCartButton).toBeEnabled();
     await this.addToCartButton.click();
+
+    const continueShopping = this.continueShoppingButton;
+    const isVisible = await continueShopping.isVisible().catch(() => false);
+    if (isVisible) {
+      await continueShopping.click();
+    }
+
     await expect(this.addToCartConfirmation.or(this.cartSubtotal).first()).toBeVisible({
       timeout: 20_000,
     });

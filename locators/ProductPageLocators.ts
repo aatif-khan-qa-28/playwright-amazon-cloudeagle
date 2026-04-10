@@ -33,6 +33,9 @@ export const ProductPageLocators = {
   /* "Go to Cart" CTA in the ATC side-sheet */
   goToCartButton: '#sw-gtc .a-button-input, #sw-gtc input[type="submit"], #sw-gtc a[href*="/cart"]',
 
+  /* "Continue Shopping" interstitial that sometimes appears after ATC */
+  continueShoppingButton: 'input[name="submit.continue-shopping"], a:has-text("Continue shopping"), button:has-text("Continue shopping")',
+
   /* "Buy Now" (alternative flow, not used in main spec) */
   buyNowButton: '#buy-now-button',
 } as const;
