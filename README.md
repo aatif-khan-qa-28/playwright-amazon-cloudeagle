@@ -1,6 +1,6 @@
 # playwright-amazon-cloudeagle
 
-Production-ready Playwright E2E test suite for the Amazon India purchase flow, built with TypeScript, a strict three-layer Page Object Model, ESLint/Prettier, and cross-browser CI.
+Production-ready Playwright E2E test suite for the Amazon India purchase flow, built with TypeScript and a strict three-layer Page Object Model.
 
 ---
 
@@ -15,7 +15,6 @@ Production-ready Playwright E2E test suite for the Amazon India purchase flow, b
 - [Environment Variables](#environment-variables)
 - [Adding New Test Data](#adding-new-test-data)
 - [Writing New Tests](#writing-new-tests)
-- [CI/CD](#cicd)
 - [Troubleshooting](#troubleshooting)
 
 ---
@@ -58,7 +57,6 @@ Data-driven E2E suite that runs the full purchase flow for every product defined
 | ESLint + `@typescript-eslint`        | ^8      | Static analysis & lint rules    |
 | `eslint-plugin-playwright`           | ^2      | Playwright-specific lint rules  |
 | Prettier                             | ^3      | Consistent code formatting      |
-| GitHub Actions                       | —       | CI/CD pipeline                  |
 
 ---
 
@@ -112,9 +110,6 @@ All product-specific values (query, name, nameParts, quantity) live in one file.
 
 ```
 playwright-amazon-cloudeagle/
-├── .github/
-│   └── workflows/
-│       └── playwright.yml              # CI: lint → cross-browser E2E
 ├── fixtures/
 │   └── index.ts                        # Custom fixture — injects all page objects
 ├── locators/
@@ -207,29 +202,21 @@ cp .env.example .env
 
 ### Code quality
 
-| Command                | Description                                  |
-| ---------------------- | -------------------------------------------- |
-| `npm run lint`         | Run ESLint                                   |
-| `npm run lint:fix`     | Auto-fix lint issues                         |
-| `npm run format`       | Format all files with Prettier               |
-| `npm run format:check` | Check formatting without writing             |
-| `npm run typecheck`    | TypeScript compiler check                    |
-| `npm run ci:check`     | typecheck + lint + format:check (mirrors CI) |
+| Command                | Description                      |
+| ---------------------- | -------------------------------- |
+| `npm run lint`         | Run ESLint                       |
+| `npm run lint:fix`     | Auto-fix lint issues             |
+| `npm run format`       | Format all files with Prettier   |
+| `npm run format:check` | Check formatting without writing |
+| `npm run typecheck`    | TypeScript compiler check        |
 
 ---
 
 ## Environment Variables
 
-| Variable   | Default                 | Description                                                            |
-| ---------- | ----------------------- | ---------------------------------------------------------------------- |
-| `BASE_URL` | `https://www.amazon.in` | Amazon store base URL                                                  |
-| `CI`       | —                       | Set automatically by GitHub Actions; enables retries + GitHub reporter |
-
-### GitHub Actions secrets
-
-| Secret     | Description                             |
-| ---------- | --------------------------------------- |
-| `BASE_URL` | Override the store URL in CI (optional) |
+| Variable   | Default                 | Description          |
+| ---------- | ----------------------- | -------------------- |
+| `BASE_URL` | `https://www.amazon.in` | Amazon store base URL |
 
 ---
 
@@ -275,10 +262,6 @@ No code changes required.
 import { test, expect } from '../fixtures';
 
 test.describe('Feature Name', () => {
-  test.beforeEach(async ({ cartPage }) => {
-    await cartPage.clearCart();
-  });
-
   test('should do something', { tag: ['@smoke', '@e2e'] }, async ({ homePage }) => {
     await test.step('Navigate', async () => {
       await homePage.navigate();
@@ -306,29 +289,6 @@ export class YourPage extends BasePage {
 
 ---
 
-## CI/CD
-
-The pipeline (`.github/workflows/playwright.yml`) triggers on:
-
-1. **Every push / PR** to `main` or `master`
-2. **Nightly at 02:00 UTC** — catches environment drift and external dependency failures
-3. **Manual trigger** from the Actions tab — supports optional browser and tag filter inputs
-
-### Pipeline stages
-
-```
-lint (typecheck → ESLint → Prettier)   ← runs on every push / PR / schedule
-    └── test (matrix: chromium | firefox | webkit)  ← manual trigger only
-```
-
-- **Lint is the authoritative blocking gate** — runs on every push, PR, and nightly schedule
-- **E2E tests run on manual trigger only** (`workflow_dispatch`) — GitHub-hosted runners have cloud IPs that Amazon actively blocks with a bot-detection interstitial. Run E2E locally with `npm test`
-- Node.js pinned to **24** for reproducibility
-- Each browser uploads its own HTML report artifact (30-day retention)
-- Screenshots, videos, and traces uploaded on failure (7-day retention)
-
----
-
 ## Troubleshooting
 
 ### Product not found on SERP
@@ -346,12 +306,6 @@ Amazon renders full variant titles in cart, not the short PDP name. The `verifyI
 ### Price reads as 0 or NaN
 
 The price locator targets `.a-offscreen` elements inside `#buybox` excluding `.a-text-price` (MRP). If Amazon changes their DOM, inspect the live page and update `ProductPageLocators.productPrice` in [locators/ProductPageLocators.ts](locators/ProductPageLocators.ts).
-
-### Tests pass locally but fail on CI
-
-1. GitHub Actions runners use US/EU IPs — Amazon India may serve different content or block the request. Set the `BASE_URL` secret to a different store if needed.
-2. Open the trace artifact: `npx playwright show-trace trace.zip`
-3. Check the HTML report artifact uploaded by each browser job.
 
 ### `clearCart()` times out
 
