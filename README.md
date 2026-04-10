@@ -24,42 +24,42 @@ Production-ready Playwright E2E test suite for the Amazon India purchase flow, b
 
 Data-driven E2E suite that runs the full purchase flow for every product defined in `test-data/data.json`. Currently covers:
 
-| Product | Search Query | Quantity |
-|---|---|---|
-| HP Smart Tank 589 | `HP smart tank` | 2 |
-| Puma Men Melanite Sneaker | `puma shoes` | 3 |
+| Product                   | Search Query    | Quantity |
+| ------------------------- | --------------- | -------- |
+| HP Smart Tank 589         | `HP smart tank` | 2        |
+| Puma Men Melanite Sneaker | `puma shoes`    | 3        |
 
 **Spec:** `tests/amazon-purchase-flow.spec.ts` — Tags: `@smoke @e2e`
 
 ### Flow (11 steps, repeated per product)
 
-| Step | Description |
-|---|---|
-| 1 | Navigate to Amazon |
-| 2 | Search for the configured query |
-| 3 | Verify search produces results |
-| 4 | Select the configured product by name |
-| 5 | Verify product page opens and capture unit price |
-| 6 | Select the configured quantity |
-| 7 | Click "Add to cart" |
-| 8 | Verify cart subtotal appears and equals unit price × quantity |
-| 9 | Click "Go to Cart" |
-| 10 | Verify Shopping Cart opens |
-| 11 | Verify item name and quantity in cart |
+| Step | Description                                                   |
+| ---- | ------------------------------------------------------------- |
+| 1    | Navigate to Amazon                                            |
+| 2    | Search for the configured query                               |
+| 3    | Verify search produces results                                |
+| 4    | Select the configured product by name                         |
+| 5    | Verify product page opens and capture unit price              |
+| 6    | Select the configured quantity                                |
+| 7    | Click "Add to cart"                                           |
+| 8    | Verify cart subtotal appears and equals unit price × quantity |
+| 9    | Click "Go to Cart"                                            |
+| 10   | Verify Shopping Cart opens                                    |
+| 11   | Verify item name and quantity in cart                         |
 
 ---
 
 ## Tech Stack
 
-| Tool | Version | Purpose |
-|---|---|---|
-| [Playwright](https://playwright.dev) | ^1.59 | Browser automation & assertions |
-| TypeScript | ES2020 | Type-safe test code |
-| dotenv | ^17 | Environment variable management |
-| ESLint + `@typescript-eslint` | ^8 | Static analysis & lint rules |
-| `eslint-plugin-playwright` | ^2 | Playwright-specific lint rules |
-| Prettier | ^3 | Consistent code formatting |
-| GitHub Actions | — | CI/CD pipeline |
+| Tool                                 | Version | Purpose                         |
+| ------------------------------------ | ------- | ------------------------------- |
+| [Playwright](https://playwright.dev) | ^1.59   | Browser automation & assertions |
+| TypeScript                           | ES2020  | Type-safe test code             |
+| dotenv                               | ^17     | Environment variable management |
+| ESLint + `@typescript-eslint`        | ^8      | Static analysis & lint rules    |
+| `eslint-plugin-playwright`           | ^2      | Playwright-specific lint rules  |
+| Prettier                             | ^3      | Consistent code formatting      |
+| GitHub Actions                       | —       | CI/CD pipeline                  |
 
 ---
 
@@ -87,6 +87,7 @@ Utilities (utils/index.ts)
 ### Key design decisions
 
 **1. Three-layer POM**
+
 - **Locators** — pure `as const` selector maps, one file per page. Single source of truth for all selectors.
 - **Page Objects** — all browser interaction + assertions. Tests never touch raw Playwright locators.
 - **Specs** — read like plain-English user stories via `test.step()`.
@@ -181,54 +182,54 @@ cp .env.example .env
 
 ### By scope
 
-| Command | Description |
-|---|---|
-| `npm test` | Run all tests across all configured browsers |
-| `npm run test:smoke` | Smoke suite only (`@smoke` tag) |
-| `npm run test:e2e` | Full E2E suite (`@e2e` tag) |
+| Command              | Description                                  |
+| -------------------- | -------------------------------------------- |
+| `npm test`           | Run all tests across all configured browsers |
+| `npm run test:smoke` | Smoke suite only (`@smoke` tag)              |
+| `npm run test:e2e`   | Full E2E suite (`@e2e` tag)                  |
 
 ### By browser
 
-| Command | Description |
-|---|---|
-| `npm run test:chromium` | Chromium only |
-| `npm run test:firefox` | Firefox only |
-| `npm run test:webkit` | WebKit / Safari only |
-| `npm run test:mobile` | Mobile Chrome (Pixel 7 viewport) |
+| Command                      | Description                            |
+| ---------------------------- | -------------------------------------- |
+| `npm run test:chromium`      | Chromium only                          |
+| `npm run test:firefox`       | Firefox only                           |
+| `npm run test:webkit`        | WebKit / Safari only                   |
+| `npm run test:mobile`        | Mobile Chrome (Pixel 7 viewport)       |
 | `npm run test:cross-browser` | Chromium + Firefox + WebKit in one run |
 
 ### Utilities
 
-| Command | Description |
-|---|---|
-| `npm run test:ui` | Open Playwright interactive UI mode |
-| `npm run test:headed` | Run with visible browser window |
-| `npm run test:report` | Open the last HTML report |
+| Command               | Description                         |
+| --------------------- | ----------------------------------- |
+| `npm run test:ui`     | Open Playwright interactive UI mode |
+| `npm run test:headed` | Run with visible browser window     |
+| `npm run test:report` | Open the last HTML report           |
 
 ### Code quality
 
-| Command | Description |
-|---|---|
-| `npm run lint` | Run ESLint |
-| `npm run lint:fix` | Auto-fix lint issues |
-| `npm run format` | Format all files with Prettier |
-| `npm run format:check` | Check formatting without writing |
-| `npm run typecheck` | TypeScript compiler check |
-| `npm run ci:check` | typecheck + lint + format:check (mirrors CI) |
+| Command                | Description                                  |
+| ---------------------- | -------------------------------------------- |
+| `npm run lint`         | Run ESLint                                   |
+| `npm run lint:fix`     | Auto-fix lint issues                         |
+| `npm run format`       | Format all files with Prettier               |
+| `npm run format:check` | Check formatting without writing             |
+| `npm run typecheck`    | TypeScript compiler check                    |
+| `npm run ci:check`     | typecheck + lint + format:check (mirrors CI) |
 
 ---
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|---|---|---|
-| `BASE_URL` | `https://www.amazon.in` | Amazon store base URL |
-| `CI` | — | Set automatically by GitHub Actions; enables retries + GitHub reporter |
+| Variable   | Default                 | Description                                                            |
+| ---------- | ----------------------- | ---------------------------------------------------------------------- |
+| `BASE_URL` | `https://www.amazon.in` | Amazon store base URL                                                  |
+| `CI`       | —                       | Set automatically by GitHub Actions; enables retries + GitHub reporter |
 
 ### GitHub Actions secrets
 
-| Secret | Description |
-|---|---|
+| Secret     | Description                             |
+| ---------- | --------------------------------------- |
 | `BASE_URL` | Override the store URL in CI (optional) |
 
 ---
@@ -324,7 +325,6 @@ lint (typecheck → ESLint → Prettier)
 - Node.js pinned to **20** for reproducibility
 - Each browser uploads its own HTML report artifact (30-day retention)
 - Screenshots, videos, and traces uploaded on failure (7-day retention)
-
 
 ---
 

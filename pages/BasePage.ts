@@ -17,7 +17,10 @@ export abstract class BasePage {
    * Navigate to a path relative to `baseURL` and wait for the DOM to be ready.
    * Override in subclasses that need custom waitUntil behaviour.
    */
-  protected async goto(path: string, waitUntil: 'domcontentloaded' | 'load' | 'networkidle' = 'domcontentloaded'): Promise<void> {
+  protected async goto(
+    path: string,
+    waitUntil: 'domcontentloaded' | 'load' | 'networkidle' = 'domcontentloaded',
+  ): Promise<void> {
     await this.page.goto(path, { waitUntil });
   }
 

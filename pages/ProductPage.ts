@@ -9,7 +9,9 @@ export class ProductPage extends BasePage {
   private readonly availability = this.page.locator(ProductPageLocators.availability);
   private readonly quantityDropdown = this.page.locator(ProductPageLocators.quantityDropdown);
   private readonly addToCartButton = this.page.locator(ProductPageLocators.addToCartButton);
-  private readonly addToCartConfirmation = this.page.locator(ProductPageLocators.addToCartConfirmation);
+  private readonly addToCartConfirmation = this.page.locator(
+    ProductPageLocators.addToCartConfirmation,
+  );
   private readonly cartSubtotal = this.page.locator(ProductPageLocators.cartSubtotal);
   private readonly goToCartButton = this.page.locator(ProductPageLocators.goToCartButton);
 
@@ -86,7 +88,7 @@ export class ProductPage extends BasePage {
     );
     throw new Error(
       `Could not extract a valid positive price from the product page.\n` +
-      `Candidates found (${allTexts.length}): ${JSON.stringify(allTexts)}`,
+        `Candidates found (${allTexts.length}): ${JSON.stringify(allTexts)}`,
     );
   }
 

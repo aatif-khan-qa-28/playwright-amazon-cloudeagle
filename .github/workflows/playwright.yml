@@ -35,7 +35,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -69,7 +69,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -86,8 +86,8 @@ jobs:
           fi
           npx playwright test $ARGS
         env:
-          # secrets.BASE_URL overrides when set; falls back to amazon.in via shell default
-          BASE_URL: ${{ secrets.BASE_URL != '' && secrets.BASE_URL || 'https://www.amazon.in' }}
+          # secrets.BASE_URL overrides when set; falls back to amazon.in
+          BASE_URL: ${{ secrets.BASE_URL || 'https://www.amazon.in' }}
           CI: true
 
       - name: Upload HTML report (${{ matrix.project }})
@@ -105,4 +105,3 @@ jobs:
           name: test-results-${{ matrix.project }}
           path: test-results/
           retention-days: 7
-

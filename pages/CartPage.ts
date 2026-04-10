@@ -121,9 +121,7 @@ export class CartPage extends BasePage {
       // Wait for the cart-update network response so we know the DOM has refreshed
       await Promise.all([
         this.page.waitForResponse(
-          (res) =>
-            res.url().includes('/cart') &&
-            (res.status() === 200 || res.status() === 302),
+          (res) => res.url().includes('/cart') && (res.status() === 200 || res.status() === 302),
           { timeout: 10_000 },
         ),
         deleteButtons.first().click(),

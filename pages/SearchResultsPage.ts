@@ -22,7 +22,9 @@ export class SearchResultsPage extends BasePage {
   async verifyMinimumResultCount(minCount: number): Promise<void> {
     await this.verifyResultsVisible();
     const count = await this.results.count();
-    expect(count, `Expected at least ${minCount} results, got ${count}`).toBeGreaterThanOrEqual(minCount);
+    expect(count, `Expected at least ${minCount} results, got ${count}`).toBeGreaterThanOrEqual(
+      minCount,
+    );
   }
 
   /**
@@ -44,9 +46,11 @@ export class SearchResultsPage extends BasePage {
   async selectProductByName(productName: string): Promise<void> {
     const product = this.results.filter({ hasText: productName }).first();
 
-    await expect(product, `Product card containing "${productName}" should be visible`).toBeVisible({
-      timeout: 15_000,
-    });
+    await expect(product, `Product card containing "${productName}" should be visible`).toBeVisible(
+      {
+        timeout: 15_000,
+      },
+    );
 
     const link = product.locator(SearchResultsPageLocators.productLink).first();
     await expect(link).toBeVisible();

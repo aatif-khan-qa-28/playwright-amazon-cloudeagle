@@ -33,7 +33,6 @@ for (const td of testCases) {
       `should complete the full purchase flow for "${td.product.name}"`,
       { tag: ['@smoke', '@e2e'] },
       async ({ homePage, searchResultsPage, productPage, cartPage }) => {
-
         // ── Step 1: Navigate to Amazon ──────────────────────────────────────
         await test.step('Navigate to Amazon homepage', async () => {
           await homePage.navigate();
@@ -126,13 +125,10 @@ for (const td of testCases) {
         });
 
         // ── Step 11: Verify items in cart — name and quantity ────────────────
-        await test.step(
-          `Verify cart contains "${td.product.name}" with quantity ${td.product.quantity}`,
-          async () => {
-            await cartPage.verifyItemInCart(td.product.name, td.product.quantity);
-            await cartPage.verifySubtotalIsDouble(unitPrice, parseInt(td.product.quantity, 10));
-          },
-        );
+        await test.step(`Verify cart contains "${td.product.name}" with quantity ${td.product.quantity}`, async () => {
+          await cartPage.verifyItemInCart(td.product.name, td.product.quantity);
+          await cartPage.verifySubtotalIsDouble(unitPrice, parseInt(td.product.quantity, 10));
+        });
       },
     );
   });

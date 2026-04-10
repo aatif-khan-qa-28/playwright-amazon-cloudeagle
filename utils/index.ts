@@ -88,11 +88,7 @@ export async function sleep(ms: number): Promise<void> {
  * Retry an async function up to `maxAttempts` times with a `delayMs` pause
  * between each try. Throws the last error if all attempts fail.
  */
-export async function retry<T>(
-  fn: () => Promise<T>,
-  maxAttempts = 3,
-  delayMs = 1_000,
-): Promise<T> {
+export async function retry<T>(fn: () => Promise<T>, maxAttempts = 3, delayMs = 1_000): Promise<T> {
   let lastError: unknown;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
