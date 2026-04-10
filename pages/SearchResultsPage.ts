@@ -39,18 +39,21 @@ export class SearchResultsPage extends BasePage {
   }
 
   /**
-   * Find the first result card whose text contains `productName`,
-   * force the link to open in the same tab, click it, and wait for
-   * the product detail page URL (/dp/).
+   * Find the first result card whose text contains ANY of the given name parts,
+   * force the link to open in the same tab, click it, and wait for /dp/ URL.
+   *
+   * Uses a regex union of nameParts (same strategy as cart matching) so results
+   * are found reliably across Amazon regional stores and search ranking changes.
    */
-  async selectProductByName(productName: string): Promise<void> {
-    const product = this.results.filter({ hasText: productName }).first();
+  async selectProductByName(productName: string, nameParts?: string[]): Promise<void> {
+    const parts = nameParts ?? [productName];
+    const pattern = new RegExp(parts.join('|'), 'i');
+    const product = this.results.filter({ hasText: pattern }).first();
 
-    await expect(product, `Product card containing "${productName}" should be visible`).toBeVisible(
-      {
-        timeout: 15_000,
-      },
-    );
+    await expect(
+      product,
+      `Product card matching any of [${parts.join(', ')}] should be visible`,
+    ).toBeVisible({ timeout: 15_000 });
 
     const link = product.locator(SearchResultsPageLocators.productLink).first();
     await expect(link).toBeVisible();

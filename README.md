@@ -24,10 +24,9 @@ Production-ready Playwright E2E test suite for the Amazon India purchase flow, b
 
 Data-driven E2E suite that runs the full purchase flow for every product defined in `test-data/data.json`. Currently covers:
 
-| Product                   | Search Query    | Quantity |
-| ------------------------- | --------------- | -------- |
-| HP Smart Tank 589         | `HP smart tank` | 2        |
-| Puma Men Melanite Sneaker | `puma shoes`    | 3        |
+| Product           | Search Query    | Quantity |
+| ----------------- | --------------- | -------- |
+| HP Smart Tank 589 | `HP smart tank` | 2        |
 
 **Spec:** `tests/amazon-purchase-flow.spec.ts` — Tags: `@smoke @e2e`
 
@@ -150,7 +149,7 @@ playwright-amazon-cloudeagle/
 
 ### Prerequisites
 
-- Node.js **20** (LTS)
+- Node.js **24** (LTS)
 - npm >= 9
 
 ### Install dependencies
@@ -322,7 +321,7 @@ lint (typecheck → ESLint → Prettier)
     └── test (matrix: chromium | firefox | webkit — parallel, fail-fast: false)
 ```
 
-- Node.js pinned to **20** for reproducibility
+- Node.js pinned to **24** for reproducibility
 - Each browser uploads its own HTML report artifact (30-day retention)
 - Screenshots, videos, and traces uploaded on failure (7-day retention)
 
@@ -336,7 +335,7 @@ Amazon's search ranking changes frequently. Update `nameParts` in `data.json` to
 
 ### Cart item not matching
 
-Amazon renders full variant titles in cart (e.g. `"PUMA | Melanite Slip On Men's Sneakers | Black-White | 8UK"`), not the short PDP name. The `verifyItemInCart()` method matches by individual words from `nameParts` — ensure at least one `namePart` word is distinctive enough to identify the product.
+Amazon renders full variant titles in cart, not the short PDP name. The `verifyItemInCart()` method matches by individual words from `nameParts` — ensure at least one `namePart` word is distinctive enough to identify the product.
 
 ### Cart subtotal mismatch
 

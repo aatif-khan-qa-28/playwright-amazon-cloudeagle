@@ -17,10 +17,10 @@ export class HomePage extends BasePage {
     // Use networkidle so CI runners (which may get redirects or bot-check pages)
     // wait for the page to fully settle before asserting landmarks.
     await this.goto('/', 'networkidle');
-    // The search box is the functional landmark we actually need — assert it first.
+    // Search box is the functional signal that the page loaded correctly.
     await expect(this.searchBox).toBeVisible({ timeout: 30_000 });
-    // Nav logo covers multiple selector variants across regional Amazon pages.
-    await expect(this.navLogo).toBeVisible({ timeout: 10_000 });
+    // Use .first() — the navLogo multi-selector can match multiple elements (strict mode violation).
+    await expect(this.navLogo.first()).toBeVisible({ timeout: 10_000 });
   }
 
   /**

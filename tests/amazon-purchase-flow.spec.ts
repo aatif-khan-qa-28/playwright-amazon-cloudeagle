@@ -61,7 +61,7 @@ for (const td of testCases) {
 
         // ── Step 4: Select product ──────────────────────────────────────────
         await test.step(`Select product: "${td.product.name}"`, async () => {
-          await searchResultsPage.selectProductByName(td.product.name);
+          await searchResultsPage.selectProductByName(td.product.name, td.product.nameParts);
         });
 
         // ── Step 5: Verify product page opens ──────────────────────────────

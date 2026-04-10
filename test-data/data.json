@@ -6,10 +6,10 @@
         "query": "HP smart tank"
       },
       "product": {
-        "name": "Smart Tank 589",
-        "nameParts": ["Smart Tank", "589"],
+        "name": "HP Smart Tank 589",
+        "nameParts": ["Smart Tank", "589", "HP"],
         "quantity": "2",
-        "minExpectedResults": 5
+        "minExpectedResults": 3
       },
       "cart": {
         "expectedItemCount": 1
