@@ -6,6 +6,7 @@ Production-ready Playwright E2E test suite for the Amazon India purchase flow, b
 
 ## Table of Contents
 
+- [Quick Setup (Start Here)](#quick-setup-start-here)
 - [Overview](#overview)
 - [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
@@ -16,6 +17,46 @@ Production-ready Playwright E2E test suite for the Amazon India purchase flow, b
 - [Adding New Test Data](#adding-new-test-data)
 - [Writing New Tests](#writing-new-tests)
 - [Troubleshooting](#troubleshooting)
+
+---
+
+## Quick Setup (Start Here)
+
+> Received this as a zip? Follow these four steps to go from unzip to running tests.
+
+### 1. Install Node.js (if not already installed)
+
+Download and install **Node.js 24 LTS** from [nodejs.org](https://nodejs.org).
+
+Verify your installation:
+
+```bash
+node -v   # should print v24.x.x
+npm -v    # should print 9.x.x or higher
+```
+
+### 2. Unzip and enter the project
+
+```bash
+unzip playwright-amazon-cloudeagle.zip
+cd playwright-amazon-cloudeagle
+```
+
+### 3. Install dependencies and browsers
+
+```bash
+npm install                              # installs all Node packages
+npx playwright install --with-deps      # downloads Chromium, Firefox, WebKit + OS deps
+```
+
+### 4. Set up environment and run
+
+```bash
+cp .env.example .env    # BASE_URL already defaults to https://www.amazon.in
+npm test                # runs the full suite
+```
+
+That's it. The HTML report opens automatically after the run — or view it later with `npm run test:report`.
 
 ---
 
