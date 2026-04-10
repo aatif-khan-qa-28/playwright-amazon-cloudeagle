@@ -114,7 +114,7 @@ All product-specific values (query, name, nameParts, quantity) live in one file.
 playwright-amazon-cloudeagle/
 ├── .github/
 │   └── workflows/
-│       └── playwright.yml              # CI: lint → cross-browser E2E → Slack notify
+│       └── playwright.yml              # CI: lint → cross-browser E2E
 ├── fixtures/
 │   └── index.ts                        # Custom fixture — injects all page objects
 ├── locators/
@@ -136,7 +136,7 @@ playwright-amazon-cloudeagle/
 │   └── index.ts                        # Pure helpers: currency parser, string, env, retry
 ├── .env                                # Local env vars (gitignored)
 ├── .env.example                        # Template — copy to .env before first run
-├── .eslintrc.json                      # ESLint rules (TypeScript + Playwright plugins)
+├── eslint.config.js                    # ESLint flat config (TypeScript + Playwright plugins)
 ├── .prettierrc.json                    # Prettier formatting config
 ├── playwright.config.ts                # Global Playwright configuration
 ├── tsconfig.json                       # TypeScript compiler options
