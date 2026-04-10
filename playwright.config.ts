@@ -91,6 +91,13 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',
+        // On CI, pass stealth args via PLAYWRIGHT_CHROMIUM_ARGS env var so
+        // playwright.yml can control them without touching this file.
+        launchOptions: {
+          args: process.env.PLAYWRIGHT_CHROMIUM_ARGS
+            ? process.env.PLAYWRIGHT_CHROMIUM_ARGS.trim().split(/\s+/)
+            : [],
+        },
       },
     },
     {

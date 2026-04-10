@@ -1,0 +1,275 @@
+name: Playwright E2E — Amazon Purchase Flow
+
+on:
+  # Manual trigger with optional project override
+  workflow_dispatch:
+    inputs:
+      project:
+        description: 'Browser project to run (chromium | firefox | webkit | all)'
+        required: false
+        default: 'chromium'
+  # Run on every push/PR to main — chromium only (fast feedback)
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Amazon India is the target; keep in sync with playwright.config.ts default
+  BASE_URL: https://www.amazon.in
+  # Force Node to use en-IN locale for consistent date/currency parsing
+  LANG: en_IN.UTF-8
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 1 — install deps + cache them so the test job starts immediately
+  # ─────────────────────────────────────────────────────────────────────────────
+  install:
+    name: Install dependencies
+    runs-on: ubuntu-latest
+    outputs:
+      cache-key: ${{ steps.cache-key.outputs.key }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Generate cache key
+        id: cache-key
+        run: echo "key=pw-browsers-${{ hashFiles('package-lock.json') }}" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ steps.cache-key.outputs.key }}
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers (+ system deps)
+        # Only download browsers when cache misses — saves ~2 min per run
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Install system deps only (cache hit)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium firefox webkit
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 2 — static checks (type-check, lint, format) — fast gate before E2E
+  # ─────────────────────────────────────────────────────────────────────────────
+  static-checks:
+    name: Static checks (typecheck · lint · format)
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run ci:check
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 3 — E2E tests
+  #
+  # Bot-detection mitigations applied here:
+  #   • Real Chrome channel (not Chromium) — most human-like UA + fingerprint
+  #   • Non-datacenter runner: uses ubuntu-latest but combined with stealth args
+  #   • --disable-blink-features=AutomationControlled removes `navigator.webdriver`
+  #   • Random startup delay (1-5 s) breaks timing-based bot fingerprinting
+  #   • PLAYWRIGHT_CHROMIUM_ARGS env var passed into launchOptions via config
+  #   • Geolocation & language headers match amazon.in locale
+  #   • 3 retries on CI so transient bot-checks are auto-recovered
+  # ─────────────────────────────────────────────────────────────────────────────
+  e2e:
+    name: E2E — ${{ matrix.project }}
+    needs: [install, static-checks]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      # Don't cancel the whole matrix when one browser fails
+      fail-fast: false
+      matrix:
+        # On push/PR we only test chromium (fastest, most compatible with amazon.in).
+        # On manual dispatch, respect the caller's choice.
+        project:
+          - ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.project != 'all' && github.event.inputs.project) || 'chromium' }}
+        exclude:
+          # De-duplicate: if dispatch chose 'all', matrix expands below
+          - project: all
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Restore Playwright browser cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ needs.install.outputs.cache-key }}
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Install Playwright system deps
+        run: npx playwright install-deps chromium
+
+      # Install real Google Chrome for the chromium project so we get Chrome's
+      # actual binary (channel: 'chrome' in playwright.config.ts).
+      # Chrome has a far more human-like fingerprint than Chromium on headless.
+      - name: Install Google Chrome (stable)
+        if: matrix.project == 'chromium'
+        run: |
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
+            | gpg --dearmor | sudo tee /usr/share/keyrings/google-chrome.gpg > /dev/null
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] \
+            http://dl.google.com/linux/chrome/deb/ stable main" \
+            | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update -qq
+          sudo apt-get install -y google-chrome-stable
+
+      # Random delay: breaks timing-based bot detection that fingerprints
+      # identical request cadences coming from CI runners.
+      - name: Random startup delay (bot-detection jitter)
+        run: sleep $(( RANDOM % 5 + 1 ))
+
+      # ── Run tests ────────────────────────────────────────────────────────────
+      - name: Run Playwright tests — ${{ matrix.project }}
+        env:
+          CI: 'true'
+          BASE_URL: ${{ env.BASE_URL }}
+          # Pass extra launch args into Playwright via env so playwright.config.ts
+          # can pick them up without hard-coding CI-only flags in the config file.
+          PLAYWRIGHT_CHROMIUM_ARGS: >-
+            --disable-blink-features=AutomationControlled
+            --disable-dev-shm-usage
+            --no-sandbox
+            --disable-setuid-sandbox
+            --disable-gpu
+            --window-size=1440,900
+        run: |
+          npx playwright test \
+            --project="${{ matrix.project }}" \
+            --reporter=github,html,list
+
+      # ── Artifacts ────────────────────────────────────────────────────────────
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.project }}
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload test results (traces / screenshots / videos)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.project }}
+          path: test-results/
+          retention-days: 7
+          # Don't fail the upload step when no failures produced artifacts
+          if-no-files-found: ignore
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 4 — all-browsers (only on manual dispatch with project=all)
+  # ─────────────────────────────────────────────────────────────────────────────
+  e2e-all-browsers:
+    name: E2E — ${{ matrix.project }} (full matrix)
+    needs: [install, static-checks]
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.project == 'all'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, firefox, webkit]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Restore Playwright browser cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ needs.install.outputs.cache-key }}
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Install Playwright system deps
+        run: npx playwright install-deps ${{ matrix.project }}
+
+      - name: Install Google Chrome (stable)
+        if: matrix.project == 'chromium'
+        run: |
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
+            | gpg --dearmor | sudo tee /usr/share/keyrings/google-chrome.gpg > /dev/null
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] \
+            http://dl.google.com/linux/chrome/deb/ stable main" \
+            | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update -qq
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Random startup delay
+        run: sleep $(( RANDOM % 5 + 1 ))
+
+      - name: Run Playwright tests — ${{ matrix.project }}
+        env:
+          CI: 'true'
+          BASE_URL: ${{ env.BASE_URL }}
+          PLAYWRIGHT_CHROMIUM_ARGS: >-
+            --disable-blink-features=AutomationControlled
+            --disable-dev-shm-usage
+            --no-sandbox
+            --disable-setuid-sandbox
+            --disable-gpu
+            --window-size=1440,900
+        run: |
+          npx playwright test \
+            --project="${{ matrix.project }}" \
+            --reporter=github,html,list
+
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.project }}-full
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.project }}-full
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: ignore
