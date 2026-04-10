@@ -4,10 +4,6 @@
 export const ProductPageLocators = {
   /* Product identity */
   productTitle: 'span#productTitle',
-  // All candidates are scoped inside the buy box (#buybox / #centerCol) to avoid
-  // picking up MRP/strikethrough prices elsewhere on the page.
-  // Read via evaluate(el => el.textContent) — never toBeVisible() — because
-  // .a-offscreen is intentionally CSS-hidden (screen-reader text).
   productPrice: [
     // Deal / current price — "base-price" data attribute marks the paying price, not MRP
     '#buybox .apexPriceToPay .a-offscreen',

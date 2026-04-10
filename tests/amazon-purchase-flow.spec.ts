@@ -2,7 +2,7 @@
  * Feature: Amazon Purchase Flow — Data-Driven
  *
  * Assignment scenario (environment-agnostic), executed for each entry in
- * test-data/data.json so the same 11-step flow validates multiple products
+ * test-data/data.json so the same 11-step flow can validate multiple products
  * without duplicating test code:
  *
  *   1.  Navigate to Amazon
