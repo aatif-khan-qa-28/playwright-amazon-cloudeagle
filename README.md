@@ -306,7 +306,3 @@ Amazon renders full variant titles in cart, not the short PDP name. The `verifyI
 ### Price reads as 0 or NaN
 
 The price locator targets `.a-offscreen` elements inside `#buybox` excluding `.a-text-price` (MRP). If Amazon changes their DOM, inspect the live page and update `ProductPageLocators.productPrice` in [locators/ProductPageLocators.ts](locators/ProductPageLocators.ts).
-
-### `clearCart()` times out
-
-The delete button selector may have changed. Check `CartPageLocators.deleteItemLink` in [locators/CartPageLocators.ts](locators/CartPageLocators.ts) against the live cart DOM.
