@@ -317,10 +317,12 @@ The pipeline (`.github/workflows/playwright.yml`) triggers on:
 ### Pipeline stages
 
 ```
-lint (typecheck → ESLint → Prettier)
-    └── test (matrix: chromium | firefox | webkit — parallel, fail-fast: false)
+lint (typecheck → ESLint → Prettier)   ← runs on every push / PR / schedule
+    └── test (matrix: chromium | firefox | webkit)  ← manual trigger only
 ```
 
+- **Lint is the authoritative blocking gate** — runs on every push, PR, and nightly schedule
+- **E2E tests run on manual trigger only** (`workflow_dispatch`) — GitHub-hosted runners have cloud IPs that Amazon actively blocks with a bot-detection interstitial. Run E2E locally with `npm test`
 - Node.js pinned to **24** for reproducibility
 - Each browser uploads its own HTML report artifact (30-day retention)
 - Screenshots, videos, and traces uploaded on failure (7-day retention)
