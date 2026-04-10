@@ -39,20 +39,25 @@ export class SearchResultsPage extends BasePage {
   }
 
   /**
-   * Find the first result card whose text contains ANY of the given name parts,
+   * Find the first result card whose text contains ALL of the given name parts,
    * force the link to open in the same tab, click it, and wait for /dp/ URL.
    *
-   * Uses a regex union of nameParts (same strategy as cart matching) so results
-   * are found reliably across Amazon regional stores and search ranking changes.
+   * Chains .filter({ hasText }) once per part so Playwright ANDs the conditions —
+   * every part must be present in the card. This prevents broad single-part matches
+   * from selecting the wrong model (e.g. "HP" alone matching the 529 instead of 589).
    */
   async selectProductByName(productName: string, nameParts?: string[]): Promise<void> {
     const parts = nameParts ?? [productName];
-    const pattern = new RegExp(parts.join('|'), 'i');
-    const product = this.results.filter({ hasText: pattern }).first();
+
+    let product = this.results;
+    for (const part of parts) {
+      product = product.filter({ hasText: part });
+    }
+    product = product.first();
 
     await expect(
       product,
-      `Product card matching any of [${parts.join(', ')}] should be visible`,
+      `Product card matching all of [${parts.join(', ')}] should be visible`,
     ).toBeVisible({ timeout: 15_000 });
 
     const link = product.locator(SearchResultsPageLocators.productLink).first();

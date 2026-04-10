@@ -10,10 +10,10 @@ export default defineConfig({
   testDir: './tests',
   timeout: 90_000,
   expect: { timeout: 15_000 },
-  fullyParallel: false,
+  fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
-  workers: 1,
+  workers: isCI ? 4 : 3,
 
   reporter: isCI
     ? [['github'], ['html', { open: 'never', outputFolder: 'playwright-report' }], ['list']]
