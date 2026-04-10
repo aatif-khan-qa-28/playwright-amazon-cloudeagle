@@ -66,7 +66,7 @@ export default defineConfig({
     video: 'retain-on-failure',
 
     /* Reasonable navigation/action timeouts */
-    navigationTimeout: 30_000,
+    navigationTimeout: 60_000,
     actionTimeout: 15_000,
 
     /* Locale for consistent date/currency formatting */
@@ -78,6 +78,9 @@ export default defineConfig({
     /* Extra HTTP headers */
     extraHTTPHeaders: {
       'Accept-Language': 'en-IN,en;q=0.9',
+      // Mimic a real browser to reduce bot-detection hits on CI runners
+      Accept:
+        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
     },
   },
 

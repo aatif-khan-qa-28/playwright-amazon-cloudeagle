@@ -7,8 +7,8 @@ export const HomePageLocators = {
   searchBox: '#twotabsearchtextbox',
   searchButton: '#nav-search-submit-button',
 
-  /* Nav */
-  navLogo: '#nav-logo-sprites',
+  /* Nav — multiple selectors cover different Amazon regional/bot-check layouts */
+  navLogo: '#nav-logo-sprites, #nav-logo, .nav-logo-link, [aria-label="Amazon"], #navbar',
   cartCount: '#nav-cart-count',
   accountMenu: '#nav-link-accountList',
 

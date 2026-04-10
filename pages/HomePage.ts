@@ -14,9 +14,13 @@ export class HomePage extends BasePage {
    * assertion on a visible landmark so the page is ready for interaction.
    */
   async navigate(): Promise<void> {
-    await this.goto('/', 'domcontentloaded');
-    await expect(this.navLogo).toBeVisible({ timeout: 20_000 });
-    await expect(this.searchBox).toBeVisible();
+    // Use networkidle so CI runners (which may get redirects or bot-check pages)
+    // wait for the page to fully settle before asserting landmarks.
+    await this.goto('/', 'networkidle');
+    // The search box is the functional landmark we actually need — assert it first.
+    await expect(this.searchBox).toBeVisible({ timeout: 30_000 });
+    // Nav logo covers multiple selector variants across regional Amazon pages.
+    await expect(this.navLogo).toBeVisible({ timeout: 10_000 });
   }
 
   /**
