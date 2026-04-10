@@ -1,0 +1,50 @@
+{
+  "name": "playwright-amazon-cloudeagle",
+  "version": "1.0.0",
+  "description": "Production-ready Playwright E2E test suite for the Amazon India purchase flow",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:e2e": "playwright test --grep @e2e",
+    "test:negative": "playwright test --grep @negative",
+    "test:cart": "playwright test --grep @cart",
+    "test:chromium": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:webkit": "playwright test --project=webkit",
+    "test:mobile": "playwright test --project=mobile-chrome",
+    "test:cross-browser": "playwright test --project=chromium --project=firefox --project=webkit",
+    "test:report": "playwright show-report",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write \"**/*.{ts,json,yml,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,json,yml,md}\"",
+    "typecheck": "tsc --noEmit",
+    "ci:check": "npm run typecheck && npm run lint && npm run format:check"
+  },
+  "keywords": [
+    "playwright",
+    "e2e",
+    "testing",
+    "amazon",
+    "typescript"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@types/node": "^25.5.2",
+    "@typescript-eslint/eslint-plugin": "^8.58.1",
+    "@typescript-eslint/parser": "^8.58.1",
+    "eslint": "^10.2.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-playwright": "^2.10.1",
+    "prettier": "^3.8.2"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.1"
+  }
+}

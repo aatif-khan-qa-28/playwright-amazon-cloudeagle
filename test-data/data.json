@@ -1,0 +1,19 @@
+{
+  "testCases": [
+    {
+      "id": "hp-smart-tank-printer",
+      "search": {
+        "query": "HP smart tank"
+      },
+      "product": {
+        "name": "Smart Tank 589",
+        "nameParts": ["Smart Tank", "589"],
+        "quantity": "2",
+        "minExpectedResults": 5
+      },
+      "cart": {
+        "expectedItemCount": 1
+      }
+    }
+  ]
+}
